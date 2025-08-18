@@ -46,7 +46,7 @@ contactsRouter.put(
 );
 contactsRouter.patch(
   '/contacts/:contactId',
-  isValidId('contactId'),
+  // isValidId('contactId'),
   validateBody(updateContactSchema),
   ctrlWrapper(patchContactController),
 );

@@ -1,6 +1,6 @@
 import Joi from 'joi';
 
-const shortStr = Joi.string().min(3).max(20).trim();
+const shortStr = Joi.string().min(1).max(20).trim();
 
 export const createContactSchema = Joi.object({
   name: shortStr.required().messages({
