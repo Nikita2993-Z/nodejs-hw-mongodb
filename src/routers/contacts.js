@@ -16,37 +16,39 @@ import {
 } from '../validation/contacts.schemas.js';
 import { validateQuery } from '../middlewares/validateQuery.js';
 import { contactsListQuerySchema } from '../validation/pagination.schema.js';
+import { authenticate } from '../middlewares/authenticate.js';
 
 const contactsRouter = Router();
-
+contactsRouter.use(authenticate);
 contactsRouter.get(
-  '/contacts',
+  '/',
   validateQuery(contactsListQuerySchema),
   ctrlWrapper(getContactsController),
 );
 contactsRouter.get(
-  '/contacts/:contactId',
+  '/:contactId',
   isValidId('contactId'),
   ctrlWrapper(getContactByIdController),
 );
 contactsRouter.post(
-  '/contacts',
+  '/',
   validateBody(createContactSchema),
   ctrlWrapper(createContactController),
 );
 contactsRouter.delete(
-  '/contacts/:contactId',
+  '/:contactId',
   isValidId('contactId'),
   ctrlWrapper(deleteContactController),
 );
 contactsRouter.put(
-  '/contacts/:contactId',
+  '/:contactId',
   isValidId('contactId'),
+  validateBody(createContactSchema),
   ctrlWrapper(upsertContactController),
 );
 contactsRouter.patch(
-  '/contacts/:contactId',
-  // isValidId('contactId'),
+  '/:contactId',
+  isValidId('contactId'),
   validateBody(updateContactSchema),
   ctrlWrapper(patchContactController),
 );
