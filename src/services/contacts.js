@@ -1,6 +1,7 @@
 import { Contact } from '../db/models/contact.js';
 
 export const getContactsPaginated = async ({
+  userId,
   page = 1,
   perPage = 10,
   sortBy = 'name',
@@ -19,10 +20,14 @@ export const getContactsPaginated = async ({
   const sort = { [sortBy]: sortOrder === 'desc' ? -1 : 1 };
   const collation = { locale: 'uk', strength: 1 };
 
-  const filter = {};
+  const filter = { userId };
   if (type) filter.contactType = type;
-  if (typeof isFavourite === 'boolean') filter.isFavourite = isFavourite;
-
+  if (typeof isFavourite !== 'undefined') {
+    filter.isFavourite =
+      typeof isFavourite === 'boolean'
+        ? isFavourite
+        : String(isFavourite).toLowerCase() === 'true';
+  }
   const countPromise = Contact.countDocuments(filter);
   const itemsPromise = Contact.find(filter)
     .collation(collation)
@@ -49,13 +54,13 @@ export const getContactsPaginated = async ({
   );
 };
 
-export const getContacts = async () => {
-  const contacts = await Contact.find();
+export const getContacts = async (userId) => {
+  const contacts = await Contact.find({ userId });
   return contacts;
 };
 
-export const getContactById = async (studentId) => {
-  const contact = await Contact.findById(studentId);
+export const getContactById = async ({ contactIdId, userId }) => {
+  const contact = await Contact.findById({ _id: contactIdId, userId });
   return contact;
 };
 
@@ -64,14 +69,19 @@ export const createContact = async (payload) => {
   return contact;
 };
 
-export const deleteContact = async (contactId) => {
-  const contact = await Contact.findOneAndDelete({ _id: contactId });
+export const deleteContact = async ({ contactId, userId }) => {
+  const contact = await Contact.findOneAndDelete({ _id: contactId, userId });
   return contact;
 };
 
-export const updateContact = async (contactId, payload, options = {}) => {
+export const updateContact = async (
+  contactId,
+  userId,
+  payload,
+  options = {},
+) => {
   const rawResult = await Contact.findOneAndUpdate(
-    { _id: contactId },
+    { _id: contactId, userId },
     payload,
     {
       new: true,
