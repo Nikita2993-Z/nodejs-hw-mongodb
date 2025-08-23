@@ -3,6 +3,7 @@ import { validateBody } from '../middlewares/validateBody.js';
 import { loginUserSchema, registerUserSchema } from '../validation/auth.js';
 import {
   loginUserController,
+  logoutUserController,
   refreshSessionController,
   registerUserController,
 } from '../controllers/auth.js';
@@ -15,6 +16,6 @@ authRouter.post(
   registerUserController,
 );
 authRouter.post('/login', validateBody(loginUserSchema), loginUserController);
-authRouter.post('/logout', loginUserController);
+authRouter.post('/logout', logoutUserController);
 authRouter.post('/refresh', refreshSessionController);
 export default authRouter;

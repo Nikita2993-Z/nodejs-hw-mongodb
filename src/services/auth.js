@@ -77,5 +77,6 @@ export const refreshUsersSession = async ({ sessionId, refreshToken }) => {
 };
 
 export const logoutUser = async (sessionId) => {
+  if (!sessionId) return;
   await Session.deleteOne({ _id: sessionId });
 };
