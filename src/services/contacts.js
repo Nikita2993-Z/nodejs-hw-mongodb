@@ -1,3 +1,4 @@
+import createHttpError from 'http-errors';
 import { Contact } from '../db/models/contact.js';
 
 export const getContactsPaginated = async ({
@@ -11,6 +12,8 @@ export const getContactsPaginated = async ({
 } = {}) => {
   page = Number(page) || 1;
   perPage = Number(perPage) || 10;
+
+  if (!userId) throw createHttpError(500, 'UserID is required');
 
   if (page < 1) page = 1;
   if (perPage < 1) perPage = 1;
@@ -63,14 +66,15 @@ export const getContactById = async ({ contactId, userId }) => {
   return Contact.findOne({ _id: contactId, userId });
 };
 
-export const createContact = async (payload) => {
-  const contact = await Contact.create(payload);
+export const createContact = async ({ payload, userId }) => {
+  if (!userId) throw createHttpError(500, 'userId is required');
+  const contact = await Contact.create({ ...payload, userId });
   return contact;
 };
 
 export const deleteContact = async ({ contactId, userId }) => {
-  const contact = await Contact.findOneAndDelete({ _id: contactId, userId });
-  return contact;
+  const deleted = await Contact.findOneAndDelete({ _id: contactId, userId });
+  if (!deleted) throw createHttpError(404, 'Contact not found');
 };
 
 export const updateContact = async (
@@ -79,6 +83,9 @@ export const updateContact = async (
   payload,
   options = {},
 ) => {
+  if (!payload || Object.keys(payload).length === 0) {
+    throw createHttpError(400, 'Body is empty');
+  }
   const rawResult = await Contact.findOneAndUpdate(
     { _id: contactId, userId },
     payload,
