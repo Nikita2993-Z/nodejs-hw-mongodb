@@ -5,6 +5,7 @@ import {
   getContactById,
   getContactsPaginated,
   updateContact,
+  uploadContactsPhoto,
 } from '../services/contacts.js';
 
 export const getContactsController = async (req, res, next) => {
@@ -57,6 +58,7 @@ export const createContactController = async (req, res) => {
   const contact = await createContact({
     payload: req.body,
     userId: req.user._id,
+    file: req.file,
   });
   res.status(201).json({
     status: 201,
@@ -95,7 +97,13 @@ export const upsertContactController = async (req, res, next) => {
 
 export const patchContactController = async (req, res, next) => {
   const { contactId } = req.params;
-  const result = await updateContact(contactId, req.user._id, req.body);
+  const { body, file } = req;
+
+  if (!file && Object.keys(body).length === 0) {
+    throw createHttpError(400, 'Body is empty');
+  }
+
+  const result = await updateContact(contactId, req.user._id, body, file);
 
   if (!result) {
     next(createHttpError(404, 'Contact not found'));
@@ -106,5 +114,19 @@ export const patchContactController = async (req, res, next) => {
     status: 200,
     message: `Successfully patched a contact!`,
     data: result.contact,
+  });
+};
+
+export const uploadContactsPhotoController = async (req, res) => {
+  console.log('DEBUG req.file:', req.file);
+  const contact = await uploadContactsPhoto(
+    req.params.contactId,
+    req.file,
+    req.user._id,
+  );
+  res.send({
+    status: 200,
+    message: 'Successfully uploaded a photo for a contact!',
+    data: contact,
   });
 };

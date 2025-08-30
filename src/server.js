@@ -8,6 +8,7 @@ import router from './routers/index.js';
 import { notFoundMiddleware } from './middlewares/notFound.js';
 import { errorHandlerMiddleware } from './middlewares/errorHandler.js';
 import cookieParser from 'cookie-parser';
+import { UPLOAD_DIR } from './constants/path.js';
 
 export const setupServer = () => {
   const app = express();
@@ -25,6 +26,8 @@ export const setupServer = () => {
   app.use(notFoundMiddleware);
 
   app.use(errorHandlerMiddleware);
+
+  app.use('/uploads', express.static(UPLOAD_DIR));
 
   const PORT = getEnvVar(ENV_VARS.PORT, 3000);
   app.listen(PORT, () => {
