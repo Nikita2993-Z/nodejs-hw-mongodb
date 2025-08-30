@@ -1,5 +1,10 @@
 import createHttpError from 'http-errors';
 import { Contact } from '../db/models/contact.js';
+import { saveFile } from '../utils/saveFile.js';
+import { getEnvVar } from '../utils/getEnvVar.js';
+import { ENV_VARS } from '../constants/envVars.js';
+import { saveFileToCloudinary } from '../utils/saveFileToCloudinary.js';
+import { saveFileToLocal } from '../utils/saveFileToLocal.js';
 
 export const getContactsPaginated = async ({
   userId,
@@ -66,9 +71,22 @@ export const getContactById = async ({ contactId, userId }) => {
   return Contact.findOne({ _id: contactId, userId });
 };
 
-export const createContact = async ({ payload, userId }) => {
+export const createContact = async ({ payload, userId, file }) => {
   if (!userId) throw createHttpError(500, 'userId is required');
-  const contact = await Contact.create({ ...payload, userId });
+
+  let photoUrl = null;
+
+  if (file) {
+    const strategy = getEnvVar(ENV_VARS.FILE_STORAGE_STRATEGY);
+
+    if (strategy === 'cloudinary') {
+      photoUrl = await saveFileToCloudinary(file);
+    } else {
+      photoUrl = await saveFileToLocal(file);
+    }
+  }
+
+  const contact = await Contact.create({ ...payload, userId, photo: photoUrl });
   return contact;
 };
 
@@ -81,14 +99,28 @@ export const updateContact = async (
   contactId,
   userId,
   payload,
+  file,
   options = {},
 ) => {
-  if (!payload || Object.keys(payload).length === 0) {
+  if (!file && (!payload || Object.keys(payload).length === 0)) {
     throw createHttpError(400, 'Body is empty');
   }
+
+  let updates = { ...payload };
+
+  if (file) {
+    const strategy = getEnvVar(ENV_VARS.FILE_STORAGE_STRATEGY);
+    const photoUrl =
+      strategy === 'cloudinary'
+        ? await saveFileToCloudinary(file)
+        : await saveFileToLocal(file);
+
+    updates.photo = photoUrl;
+  }
+
   const rawResult = await Contact.findOneAndUpdate(
     { _id: contactId, userId },
-    payload,
+    updates,
     {
       new: true,
       includeResultMetadata: true,
@@ -102,4 +134,20 @@ export const updateContact = async (
     contact: rawResult.value,
     isNew: Boolean(rawResult?.lastErrorObject?.upserted),
   };
+};
+
+export const uploadContactsPhoto = async (contactId, file, userId) => {
+  const contact = await Contact.findOne({ _id: contactId, userId });
+  if (!contact) throw createHttpError(404, 'Contact not found!');
+
+  const strategy = getEnvVar(ENV_VARS.FILE_STORAGE_STRATEGY);
+  const filePath =
+    strategy === 'cloudinary'
+      ? await saveFileToCloudinary(file)
+      : await saveFileToLocal(file);
+
+  contact.photo = filePath;
+  await contact.save();
+
+  return contact;
 };
