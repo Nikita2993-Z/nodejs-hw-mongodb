@@ -7,7 +7,10 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npm run build-docs",
+    "build-docs": "redocly bundle docs/openapi.yaml --ext json -o docs/swagger.json",
+    "preview-docs": "redocly preview-docs"
   },
   "repository": {
     "type": "git",
@@ -22,6 +25,7 @@
   "homepage": "https://github.com/Nikita2993-Z/nodejs-hw-mongodb#readme",
   "devDependencies": {
     "@eslint/js": "^9.32.0",
+    "@redocly/cli": "^2.0.8",
     "eslint": "^9.32.0",
     "globals": "^16.3.0",
     "nodemon": "^3.1.10"
@@ -34,6 +38,7 @@
     "crypto": "^1.0.1",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
+    "google-auth-library": "^10.3.0",
     "handlebars": "^4.7.8",
     "http-errors": "^2.0.0",
     "joi": "^18.0.0",
@@ -43,6 +48,7 @@
     "nodemailer": "^7.0.5",
     "pino-http": "^10.5.0",
     "pino-pretty": "^13.1.1",
-    "schema": "^0.2.1"
+    "schema": "^0.2.1",
+    "swagger-ui-express": "^5.0.1"
   }
 }

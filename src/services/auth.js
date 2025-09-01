@@ -12,6 +12,10 @@ import { getEnvVar } from '../utils/getEnvVar.js';
 import { ENV_VARS } from '../constants/envVars.js';
 import { TEMPLATE_DIR_PATH } from '../constants/path.js';
 import { sendMail } from '../utils/sendEmail.js';
+import {
+  getFullNameFromGoogleTokenPayload,
+  validateCode,
+} from '../utils/googleOAuth2.js';
 
 const resetPasswordTemplate = fs
   .readFileSync(path.join(TEMPLATE_DIR_PATH, 'send-reset-email-password.html'))
@@ -150,4 +154,28 @@ export const resetPassword = async (token, password) => {
   user.password = await bcrypt.hash(password, 10);
 
   await user.save();
+};
+
+export const loginOrSignupWithGoogle = async (code) => {
+  const loginTicket = await validateCode(code);
+  const payload = loginTicket.getPayload();
+  if (!payload) throw createHttpError(401);
+
+  let user = await User.findOne({ email: payload.email });
+  if (!user) {
+    const password = await bcrypt.hash(randomBytes(10), 10);
+    user = await User.create({
+      email: payload.email,
+      name: getFullNameFromGoogleTokenPayload(payload),
+      password,
+      role: 'parent',
+    });
+  }
+
+  const newSession = createSession();
+
+  return await Session.create({
+    userId: user._id,
+    ...newSession,
+  });
 };

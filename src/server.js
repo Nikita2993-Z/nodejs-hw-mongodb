@@ -9,6 +9,7 @@ import { notFoundMiddleware } from './middlewares/notFound.js';
 import { errorHandlerMiddleware } from './middlewares/errorHandler.js';
 import cookieParser from 'cookie-parser';
 import { UPLOAD_DIR } from './constants/path.js';
+import { swaggerDocs } from './middlewares/swaggerDocs.js';
 
 export const setupServer = () => {
   const app = express();
@@ -20,7 +21,7 @@ export const setupServer = () => {
       limit: '100kb',
     }),
   );
-
+  app.use('/api-docs', swaggerDocs());
   app.use(router);
 
   app.use(notFoundMiddleware);

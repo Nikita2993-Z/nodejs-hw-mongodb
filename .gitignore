@@ -7,3 +7,7 @@
 .vscode
 .DS_Store
 .idea
+
+# Google credentials
+google-oauth.json
+src/config/google-oauth.json
