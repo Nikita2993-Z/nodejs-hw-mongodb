@@ -1,0 +1,47 @@
+type: object
+required:
+  - userId
+  - name
+  - phoneNumber
+  - contactType
+
+properties:
+  userId:
+    description: "Owner user's id"
+    type: string
+    example: 65e4decdd286b30065d54af9
+  name:
+    description: "Contact's name"
+    type: string
+    example: 'John Doe'
+  phoneNumber:
+    description: "Contact's phone number"
+    type: string
+    example: '+380931234567'
+  email:
+    description: "Contact's email"
+    type: string
+    example: 'john.doe@example.com'
+  isFavourite:
+    description: 'Is this contact marked as favourite'
+    type: boolean
+    example: false
+  contactType:
+    description: 'Type of contact'
+    type: string
+    enum: ['work', 'home', 'personal']
+    example: personal
+  photo:
+    description: "Link to contact's photo"
+    type: string
+    example: https://res.cloudinary.com/uqwgdu/image/upload/image.png
+  createdAt:
+    description: 'Date of contact creation'
+    type: string
+    format: date-time
+    example: '2025-08-31T12:34:56.000Z'
+  updatedAt:
+    description: 'Date of last update'
+    type: string
+    format: date-time
+    example: '2025-08-31T12:40:00.000Z'
